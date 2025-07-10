@@ -26,7 +26,7 @@ function App() {
         {count > 10 ? (
           <p>Count is getting big</p>
         ) : count < 0 ? (
-          <p>Count is negative</p>
+          <p>Count is negative!</p>
         ) : null}
       </div>
     </div>
