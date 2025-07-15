@@ -24,9 +24,9 @@ function App() {
       </div>
       <div className="counter-message">
         {count > 10 ? (
-          <p>Number is getting big!</p>
+          <p>Count is getting big!</p>
         ) : count < 0 ? (
-          <p>Number is negative!</p>
+          <p>Count is negative!</p>
         ) : null}
       </div>
     </div>
