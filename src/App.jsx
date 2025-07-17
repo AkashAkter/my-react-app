@@ -2,99 +2,92 @@ import { useState, useEffect } from "react";
 
 function App() {
   const [count, setCount] = useState(0);
-  const [emoji, setEmoji] = useState("😊");
-  const [history, setHistory] = useState([]);
-  const [isBouncing, setIsBouncing] = useState(false);
+  const [trend, setTrend] = useState(null);
+  const [lastCount, setLastCount] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const increment = () => {
-    setCount(count + 1);
-    setHistory([...history.slice(-4), count + 1]);
-    bounce();
+  const changeCount = (newCount) => {
+    setLastCount(count);
+    setCount(newCount);
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 300);
   };
 
-  const decrement = () => {
-    setCount(count - 1);
-    setHistory([...history.slice(-4), count - 1]);
-    bounce();
-  };
-
-  const reset = () => {
-    setCount(0);
-    setHistory([...history.slice(-4), 0]);
-    bounce();
-  };
-
-  const random = () => {
-    const randomValue = Math.floor(Math.random() * 101) - 50;
-    setCount(randomValue);
-    setHistory([...history.slice(-4), randomValue]);
-    bounce();
-  };
-
-  const bounce = () => {
-    setIsBouncing(true);
-    setTimeout(() => setIsBouncing(false), 500);
-  };
+  const increment = () => changeCount(count + 1);
+  const decrement = () => changeCount(count - 1);
+  const reset = () => changeCount(0);
+  const random = () => changeCount(Math.floor(Math.random() * 201) - 100);
 
   useEffect(() => {
-    if (count > 20) setEmoji("🚀");
-    else if (count > 10) setEmoji("😎");
-    else if (count > 0) setEmoji("😊");
-    else if (count === 0) setEmoji("🤔");
-    else if (count > -10) setEmoji("😕");
-    else setEmoji("😱");
-  }, [count]);
+    setTrend(count > lastCount ? "up" : count < lastCount ? "down" : null);
+  }, [count, lastCount]);
 
   return (
     <div className="counter-app">
-      <h1>Emoji Counter</h1>
-      <div className={`emoji-display ${isBouncing ? "bounce" : ""}`}>
-        {emoji}
-      </div>
-      <div className={`counter-display ${count < 0 ? "negative" : ""}`}>
-        {count}
+      <h1>Elevate Counter</h1>
+      <p className="app-description">A refined counting experience</p>
+
+      <div className={`counter-display ${trend} ${isAnimating ? "pulse" : ""}`}>
+        <div className="counter-value">{count}</div>
+        <div className="counter-trend">
+          {trend === "up" && <span className="trend-up">▲</span>}
+          {trend === "down" && <span className="trend-down">▼</span>}
+        </div>
       </div>
 
       <div className="button-group">
-        <button className="btn btn-decrement" onClick={decrement}>
-          Decrease
+        <button
+          className="btn btn-decrement"
+          onClick={decrement}
+          aria-label="Decrease value"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path d="M19 13H5v-2h14v2z" fill="currentColor" />
+          </svg>
         </button>
-        <button className="btn btn-random" onClick={random}>
-          Random
+        <button
+          className="btn btn-reset"
+          onClick={reset}
+          aria-label="Reset to zero"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path
+              d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"
+              fill="currentColor"
+            />
+          </svg>
         </button>
-        <button className="btn btn-increment" onClick={increment}>
-          Increase
+        <button
+          className="btn btn-increment"
+          onClick={increment}
+          aria-label="Increase value"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
+          </svg>
         </button>
       </div>
 
-      <button className="btn btn-reset" onClick={reset}>
-        Reset to Zero
+      <button
+        className="btn btn-random"
+        onClick={random}
+        aria-label="Random value"
+      >
+        Random
       </button>
 
-      <div className="counter-message">
-        {count > 20 ? (
-          <p>To infinity and beyond! 🚀</p>
-        ) : count > 10 ? (
-          <p>You're on fire! 🔥</p>
-        ) : count < -10 ? (
-          <p>Danger zone! ⚠️</p>
-        ) : count < 0 ? (
-          <p>Below zero! ❄️</p>
-        ) : null}
-      </div>
-
-      {history.length > 0 && (
-        <div className="history">
-          <p>Recent values:</p>
-          <div className="history-badges">
-            {history.reverse().map((item, index) => (
-              <span key={index} className="history-badge">
-                {item}
-              </span>
-            ))}
-          </div>
+      <div className="counter-meta">
+        <div className="meta-item">
+          <span className="meta-label">Parity:</span>
+          <span className="meta-value">{count % 2 === 0 ? "Even" : "Odd"}</span>
         </div>
-      )}
+        <div className="meta-item">
+          <span className="meta-label">Sign:</span>
+          <span className="meta-value">
+            {count > 0 ? "Positive" : count < 0 ? "Negative" : "Zero"}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -103,162 +96,210 @@ export default App;
 
 // CSS Styles
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+  
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a56d4;
+    --secondary: #3f37c9;
+    --danger: #f72585;
+    --success: #4cc9f0;
+    --dark: #212529;
+    --light: #f8f9fa;
+    --border-radius: 12px;
+    --transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
+  }
   
   body {
-    font-family: 'Comic Neue', cursive;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background-color: #f5f7ff;
+    color: var(--dark);
+    line-height: 1.6;
   }
-
+  
   .counter-app {
-    text-align: center;
+    width: 100%;
+    max-width: 380px;
     background: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
     padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    width: 320px;
-    border: 3px solid #ff8a65;
     position: relative;
     overflow: hidden;
   }
-
-  .counter-app::before {
-    content: "";
+  
+  .counter-app::after {
+    content: '';
     position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
-    z-index: -1;
-    filter: blur(20px);
-    opacity: 0.6;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
   }
-
+  
   h1 {
-    color: #ff7043;
-    margin-bottom: 1rem;
-    font-size: 2.2rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    font-weight: 600;
+    font-size: 1.75rem;
+    margin: 0 0 0.25rem;
+    color: var(--dark);
   }
-
-  .emoji-display {
-    font-size: 5rem;
-    margin: 0.5rem 0;
-    transition: all 0.3s ease;
+  
+  .app-description {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0 0 1.5rem;
   }
-
-  .emoji-display.bounce {
-    animation: bounce 0.5s;
-  }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-  }
-
+  
   .counter-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background-color: var(--light);
+    border-radius: var(--border-radius);
+    position: relative;
+    transition: var(--transition);
+  }
+  
+  .counter-display.up {
+    background-color: rgba(76, 201, 240, 0.1);
+  }
+  
+  .counter-display.down {
+    background-color: rgba(247, 37, 133, 0.1);
+  }
+  
+  .counter-display.pulse {
+    animation: pulse 0.3s ease;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  
+  .counter-value {
     font-size: 3.5rem;
-    font-weight: bold;
-    margin: 0.5rem 0;
-    padding: 0.5rem;
-    background: linear-gradient(to right, #a1c4fd, #c2e9fb);
-    border-radius: 10px;
-    color: #2c3e50;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    font-weight: 300;
+    letter-spacing: -1px;
+    color: var(--dark);
   }
-
-  .counter-display.negative {
-    background: linear-gradient(to right, #ff9a9e, #fad0c4);
-    color: #c0392b;
+  
+  .counter-trend {
+    font-size: 1.25rem;
+    opacity: 0.8;
   }
-
+  
+  .trend-up {
+    color: var(--success);
+  }
+  
+  .trend-down {
+    color: var(--danger);
+  }
+  
   .button-group {
     display: flex;
-    justify-content: space-between;
-    gap: 10px;
+    gap: 0.75rem;
     margin: 1.5rem 0;
   }
-
+  
   .btn {
-    padding: 0.8rem 1rem;
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem;
     border: none;
-    border-radius: 50px;
+    border-radius: var(--border-radius);
+    font-size: 0.875rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: var(--transition);
+    flex: 1;
   }
-
+  
   .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
   }
-
+  
   .btn:active {
-    transform: translateY(1px);
+    transform: translateY(0);
   }
-
+  
   .btn-increment {
-    background: linear-gradient(to right, #56ab2f, #a8e063);
+    background-color: var(--primary);
     color: white;
   }
-
+  
+  .btn-increment:hover {
+    background-color: var(--primary-dark);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+  }
+  
   .btn-decrement {
-    background: linear-gradient(to right, #ff512f, #dd2476);
+    background-color: var(--danger);
     color: white;
   }
-
+  
+  .btn-decrement:hover {
+    box-shadow: 0 5px 15px rgba(247, 37, 133, 0.3);
+  }
+  
   .btn-reset {
-    background: linear-gradient(to right, #4776e6, #8e54e9);
-    color: white;
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  
+  .btn-reset:hover {
+    background-color: #dee2e6;
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.1);
+  }
+  
+  .btn-random {
     width: 100%;
+    background-color: white;
+    color: var(--primary);
+    border: 1px solid #dee2e6;
     margin-bottom: 1.5rem;
   }
-
-  .btn-random {
-    background: linear-gradient(to right, #ffb347, #ffcc33);
-    color: white;
+  
+  .btn-random:hover {
+    border-color: var(--primary);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.1);
   }
-
-  .counter-message {
-    height: 24px;
-    margin: 1rem 0;
-    font-size: 1.1rem;
-    color: #ff7043;
-    font-weight: bold;
-  }
-
-  .history {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 2px dashed #ffab91;
-  }
-
-  .history p {
-    margin-bottom: 0.5rem;
-    color: #ff7043;
-  }
-
-  .history-badges {
+  
+  .counter-meta {
     display: flex;
-    justify-content: center;
-    gap: 8px;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
   }
-
-  .history-badge {
-    background: #ffccbc;
-    color: #bf360c;
-    padding: 0.3rem 0.6rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+  
+  .meta-item {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .meta-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+  }
+  
+  .meta-value {
+    font-weight: 500;
+    color: var(--dark);
   }
 `;
 
